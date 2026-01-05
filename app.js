@@ -278,7 +278,11 @@ app.get('/install/:id', async (req, res) => {
   `);
 });
 
-app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
-  logger.info(`Public domain: ${PUBLIC_DOMAIN}`);
-});
+if (!global.serverStarted) {
+  app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`);
+    logger.info(`Public domain: ${PUBLIC_DOMAIN}`);
+    global.serverStarted = true;
+  });
+}
+
