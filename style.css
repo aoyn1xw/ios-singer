@@ -6,7 +6,7 @@
 
 html, body {
   height: 100%;
-  overflow: enabled;
+  overflow: auto;
   position: relative;
   width: 100%;
 }
@@ -54,9 +54,8 @@ body[data-theme="dark"]::after {
 
 .container {
   position: relative;
-  width: 100%;
+  width: 92vw;
   max-width: 450px;
-  min-width: 450px;
   padding: 24px;
   margin: 0 auto;
   background: rgba(255 255 255 / 0.3);
@@ -156,6 +155,19 @@ body[data-theme="dark"] .container.guides ol li::marker {
   margin-bottom: 20px;
 }
 
+.container.signer {
+  background: #f7f7f7;
+  border: none;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+  border-radius: 36px;
+  padding: 28px 22px;
+}
+
+.container.signer h1 {
+  font-size: 1.6rem;
+  letter-spacing: 0.2px;
+}
+
 .card, .blue-card, .pink-card {
   display: block;
   width: 100%;
@@ -250,52 +262,53 @@ body[data-theme="dark"] .toggle {
   width: 30px;
 }
 
-.container.signer .card {
+.container.signer form .card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  margin: 12px auto;
-  padding: 18px;
-  border-radius: 35px;
-  box-shadow: 0 30px 60px rgba(0 0 0 / 0.1);
-  background: rgba(255 255 255 / 0.3);
-  border: 1px solid rgba(255 255 255 / 0.3);
+  gap: 12px;
+  margin: 14px auto;
+  padding: 14px 18px;
+  border-radius: 999px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  background: #f3f3f3;
+  border: 1px solid rgba(0, 0, 0, 0.03);
   backdrop-filter: blur(10px);
-  color: #1d1d1f;
-  font-weight: 500;
+  color: #333;
+  font-weight: 600;
+  opacity: 1;
 }
 
-body[data-theme="dark"] .container.signer .card {
-  background: rgba(30 30 30 / 0.3);
-  border: 1px solid rgba(255 255 255 / 0.06);
+body[data-theme="dark"] .container.signer form .card {
+  background: rgba(30 30 30 / 0.6);
+  border: 1px solid rgba(255 255 255 / 0.08);
   color: #fff;
   font-weight: 500;
 }
 
-.container.signer .card label {
+.container.signer form .card label {
   flex: 1 1 auto;
   min-width: 0;
   white-space: normal;
   text-align: left;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   user-select: none;
   padding-right: 10px;
-  color: inherit;
+  color: #555;
   transition: color 1s ease, border-color 1s ease;
 }
 
-.container.signer .card input[type="text"],
-.container.signer .card input[type="number"],
-.container.signer .card input[type="password"] {
+.container.signer form .card input[type="text"],
+.container.signer form .card input[type="number"],
+.container.signer form .card input[type="password"] {
   flex: 0 0 125px;
   text-align: right;
-  padding: 6px 10px;
-  border-radius: 12px;
-  border: 2px solid rgba(0, 0, 0, 0.3);
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
   font-size: 1rem;
-  background: transparent;
+  background: #fff;
   color: inherit;
   min-width: 0;
   white-space: nowrap;
@@ -303,9 +316,9 @@ body[data-theme="dark"] .container.signer .card {
   font-weight: 500;
 }
 
-body[data-theme="dark"] .container.signer .card input[type="text"],
-body[data-theme="dark"] .container.signer .card input[type="number"],
-body[data-theme="dark"] .container.signer .card input[type="password"] {
+body[data-theme="dark"] .container.signer form .card input[type="text"],
+body[data-theme="dark"] .container.signer form .card input[type="number"],
+body[data-theme="dark"] .container.signer form .card input[type="password"] {
   border-color: rgba(255 255 255 / 0.3);
   font-weight: 500;
 }
@@ -357,11 +370,23 @@ body[data-theme="dark"] #advancedContent .checkbox-group {
   font-weight: 500;
 }
 
-.container.signer .card:not(.blue-card):hover {
+.container.signer form .card:not(.blue-card):hover {
   transform: none !important;
-  opacity: 0.75 !important;
+  opacity: 1 !important;
   cursor: default !important;
   transition: opacity 0.3s ease;
+}
+
+.container.signer .blue-card {
+  border-radius: 999px;
+  padding: 14px 18px;
+  font-weight: 600;
+  background: linear-gradient(180deg, #7fb7ff 0%, #5fa3ff 100%);
+  box-shadow: 0 12px 24px rgba(0, 122, 255, 0.25);
+}
+
+.container.signer .blue-card:hover {
+  transform: none;
 }
 
 #advancedContent {
@@ -662,6 +687,10 @@ body[data-theme="dark"] #popup {
 }
 
 #popup .card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
   background: inherit;
   border-radius: 35px;
   padding: 28px;
@@ -677,6 +706,7 @@ body[data-theme="dark"] #popup {
   color: inherit;
   font-size: 0.95rem;
   box-sizing: border-box;
+  text-align: left;
 }
 
 #popup .blue-card, .card .blue-card {
