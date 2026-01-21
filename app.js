@@ -251,12 +251,17 @@ app.get('/install/:id', async (req, res) => {
       <head>
         <title>Install ${data.displayName}</title>
         <link rel="stylesheet" href="/style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body>
-        <h1>${data.displayName}</h1>
-        <p>Version: ${data.bundleVersion}</p>
-        <p>Bundle ID: ${data.bundleId}</p>
-        <a href="${data.installLink}" class="install-button">Install on iOS</a>
+      <body style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f0f0f0;">
+        <div class="container signer" style="margin:0 auto;max-width:450px;min-width:350px;">
+          <div class="card" style="padding:32px 24px 24px 24px;background:rgba(255,255,255,0.95);border-radius:35px;box-shadow:0 15px 30px rgba(0,0,0,0.1);text-align:center;">
+            <h1 style="font-size:2rem;margin-bottom:18px;font-weight:700;">${data.displayName}</h1>
+            <div style="margin-bottom:10px;font-size:1.1rem;">Version: <b>${data.bundleVersion}</b></div>
+            <div style="margin-bottom:18px;font-size:1.1rem;">Bundle ID: <b>${data.bundleId}</b></div>
+            <a href="${data.installLink}" class="blue-card" style="display:block;margin:18px 0 0 0;font-size:1.1rem;">Install on iOS</a>
+          </div>
+        </div>
       </body>
     </html>
   `);

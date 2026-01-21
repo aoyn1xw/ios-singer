@@ -134,12 +134,28 @@
       })
       .then(function(data) {
         if (data.installLink) {
-          var title = document.createElement('h3');
-          title.textContent = 'Signing Complete';
+          // Card style popup content
+          var card = document.createElement('div');
+          card.className = 'card';
+          card.style.background = 'rgba(255,255,255,0.95)';
+          card.style.borderRadius = '35px';
+          card.style.boxShadow = '0 15px 30px rgba(0,0,0,0.1)';
+          card.style.padding = '32px 24px 24px 24px';
+          card.style.margin = '0 auto';
+          card.style.maxWidth = '400px';
+          card.style.textAlign = 'center';
 
-          var message = document.createElement('p');
+          var title = document.createElement('h2');
+          title.textContent = 'Signing Complete';
+          title.style.marginBottom = '18px';
+          title.style.fontWeight = '700';
+          title.style.fontSize = '2rem';
+
+          var message = document.createElement('div');
           message.className = 'success';
           message.textContent = 'Your signed IPA is ready!';
+          message.style.marginBottom = '18px';
+          message.style.fontSize = '1.1rem';
 
           var linkBtn = document.createElement('a');
           linkBtn.href = data.installLink;
@@ -147,8 +163,9 @@
           linkBtn.target = '_blank';
           linkBtn.rel = 'noopener noreferrer';
           linkBtn.className = 'blue-card';
-          linkBtn.style.display = 'inline-block';
-          linkBtn.style.margin = '15px 0';
+          linkBtn.style.display = 'block';
+          linkBtn.style.margin = '18px 0 10px 0';
+          linkBtn.style.fontSize = '1.1rem';
 
           var shareInput = document.createElement('input');
           shareInput.type = 'text';
@@ -156,19 +173,27 @@
           shareInput.readOnly = true;
           shareInput.style.width = '100%';
           shareInput.style.textAlign = 'center';
-          shareInput.style.margin = '10px 0';
+          shareInput.style.margin = '10px 0 18px 0';
+          shareInput.style.borderRadius = '12px';
+          shareInput.style.border = '2px solid #eee';
+          shareInput.style.padding = '8px';
+          shareInput.style.background = '#fafbfc';
           shareInput.onclick = function() { this.select(); };
 
           var closeBtn = document.createElement('button');
           closeBtn.textContent = 'Close';
           closeBtn.onclick = closePopup;
+          closeBtn.style.marginTop = '10px';
+          closeBtn.style.width = '100%';
+
+          card.appendChild(title);
+          card.appendChild(message);
+          card.appendChild(linkBtn);
+          card.appendChild(shareInput);
+          card.appendChild(closeBtn);
 
           popup.innerHTML = '';
-          popup.appendChild(title);
-          popup.appendChild(message);
-          popup.appendChild(linkBtn);
-          popup.appendChild(shareInput);
-          popup.appendChild(closeBtn);
+          popup.appendChild(card);
           popup.classList.add('show');
         } else {
           throw new Error(data.error || 'Unknown error');
