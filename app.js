@@ -42,8 +42,8 @@ const logger = winston.createLogger({
 logger.add(new winston.transports.Console({ format: winston.format.simple() }));
 
 const app = express();
-app.use(express.urlencoded({ extended: true, limit: '5gb' }));
-app.use(express.json({ limit: '5gb' }));
+app.use(express.urlencoded({ extended: true, limit: '500mb' }));
+app.use(express.json({ limit: '500mb' }));
 app.use(cors());
 
 const limiter = rateLimit({
@@ -70,7 +70,7 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const upload = multer({
   dest: path.join(WORK_DIR, 'temp'),
-  limits: { fileSize: 5 * 1024 * 1024 * 1024 },
+  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['.ipa', '.p12', '.mobileprovision'];
     const ext = path.extname(file.originalname).toLowerCase();
@@ -147,27 +147,11 @@ app.post('/sign',
 
       uniqueSuffix = generateRandomSuffix();
 
-      // Handle IPA upload or URL
-      if (req.body.ipa_url && !req.files.ipa) {
-        const https = require('https');
-        const http = require('http');
-        ipaPath = path.join(WORK_DIR, 'temp', `input_${uniqueSuffix}.ipa`);
-        const fileStream = fs.createWriteStream(ipaPath);
-        const protocol = req.body.ipa_url.startsWith('https') ? https : http;
-
-        await new Promise((resolve, reject) => {
-          protocol.get(req.body.ipa_url, (response) => {
-            response.pipe(fileStream);
-            fileStream.on('finish', () => fileStream.close(resolve));
-          }).on('error', (err) => {
-            fs.unlink(ipaPath, () => {});
-            reject(new Error('Failed to download IPA: ' + err.message));
-          });
-        });
-      } else if (req.files.ipa) {
+      // Only handle IPA file upload
+      if (req.files.ipa) {
         ipaPath = path.join(WORK_DIR, 'temp', `input_${uniqueSuffix}.ipa`);
         await fsp.rename(req.files.ipa[0].path, ipaPath);
-      } else return res.status(400).json({ error: 'IPA file or ipa_url required' });
+      } else return res.status(400).json({ error: 'IPA file required' });
 
       const p12Password = (req.body.p12_password || '').trim();
       p12Path = path.join(WORK_DIR, 'p12', `cert_${uniqueSuffix}.p12`);
@@ -277,6 +261,35 @@ app.get('/install/:id', async (req, res) => {
     </html>
   `);
 });
+
+// Periodic cleanup: remove files older than 20 minutes from uploads subfolders (except 'signed' and 'plist')
+const CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // every 5 minutes
+const FILE_MAX_AGE_MS = 20 * 60 * 1000; // 20 minutes
+const EXCLUDE_DIRS = ['signed', 'plist'];
+
+async function cleanupUploads() {
+  try {
+    for (const dir of REQUIRED_DIRS) {
+      if (EXCLUDE_DIRS.includes(dir)) continue;
+      const dirPath = path.join(WORK_DIR, dir);
+      const files = await fsp.readdir(dirPath);
+      for (const file of files) {
+        const filePath = path.join(dirPath, file);
+        try {
+          const stat = await fsp.stat(filePath);
+          if (Date.now() - stat.mtimeMs > FILE_MAX_AGE_MS) {
+            await fsp.unlink(filePath);
+            logger.info(`Cleaned up old file: ${filePath}`);
+          }
+        } catch (e) { /* ignore individual file errors */ }
+      }
+    }
+  } catch (e) {
+    logger.error('Cleanup error: ' + e.message);
+  }
+}
+
+setInterval(cleanupUploads, CLEANUP_INTERVAL_MS);
 
 if (!global.serverStarted) {
   app.listen(PORT, () => {

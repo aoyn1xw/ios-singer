@@ -49,10 +49,7 @@
         <input type="file" name="ipa" id="ipa">
       </div>
 
-      <div class="card">
-        <label for="ipa_url">Or IPA URL</label>
-        <input type="text" name="ipa_url" id="ipa_url" placeholder="https://example.com/app.ipa">
-      </div>
+
 
       <div class="card">
         <label>Certificate (.p12)</label>
@@ -99,22 +96,22 @@
     var form = document.getElementById('signForm');
     var popup = document.getElementById('popup');
 
+
     form.addEventListener('submit', function(e) {
       e.preventDefault();
-      
+
       var ipaFile = document.getElementById('ipa').files[0];
-      var ipaUrl = document.getElementById('ipa_url').value.trim();
       var p12File = document.getElementById('p12').files[0];
       var mpFile = document.getElementById('mobileprovision').files[0];
-      
-      if ((!ipaFile && !ipaUrl) || !p12File || !mpFile) {
-        alert('Please select P12 and Provisioning Profile, and either upload an IPA file or provide an IPA URL');
+
+      if (!ipaFile || !p12File || !mpFile) {
+        alert('Please select IPA, P12, and Provisioning Profile files.');
         return;
       }
-      
+
       var formData = new FormData(form);
       var button = form.querySelector('button[type="submit"]');
-      
+
       button.disabled = true;
       button.textContent = 'Signing...';
 
@@ -137,35 +134,46 @@
       })
       .then(function(data) {
         if (data.installLink) {
-          var link = document.createElement('a');
-          link.href = data.installLink;
-          link.textContent = data.installLink;
-          link.style.wordBreak = 'break-all';
-          link.style.color = '#007aff';
-          link.style.textDecoration = 'none';
-          
-          var closeBtn = document.createElement('button');
-          closeBtn.textContent = 'Close';
-          closeBtn.onclick = closePopup;
-          
           var title = document.createElement('h3');
           title.textContent = 'Signing Complete';
-          
+
           var message = document.createElement('p');
           message.className = 'success';
           message.textContent = 'Your signed IPA is ready!';
-          
+
+          var linkBtn = document.createElement('a');
+          linkBtn.href = data.installLink;
+          linkBtn.textContent = 'Open Install Page';
+          linkBtn.target = '_blank';
+          linkBtn.rel = 'noopener noreferrer';
+          linkBtn.className = 'blue-card';
+          linkBtn.style.display = 'inline-block';
+          linkBtn.style.margin = '15px 0';
+
+          var shareInput = document.createElement('input');
+          shareInput.type = 'text';
+          shareInput.value = data.installLink;
+          shareInput.readOnly = true;
+          shareInput.style.width = '100%';
+          shareInput.style.textAlign = 'center';
+          shareInput.style.margin = '10px 0';
+          shareInput.onclick = function() { this.select(); };
+
+          var closeBtn = document.createElement('button');
+          closeBtn.textContent = 'Close';
+          closeBtn.onclick = closePopup;
+
           popup.innerHTML = '';
           popup.appendChild(title);
           popup.appendChild(message);
-          popup.appendChild(link);
-          popup.appendChild(document.createElement('br'));
-          popup.appendChild(document.createElement('br'));
+          popup.appendChild(linkBtn);
+          popup.appendChild(shareInput);
           popup.appendChild(closeBtn);
+          popup.classList.add('show');
         } else {
           throw new Error(data.error || 'Unknown error');
         }
-        popup.style.display = 'block';
+        popup.classList.add('show');
         button.disabled = false;
         button.textContent = 'Sign IPA';
       })
@@ -173,22 +181,23 @@
         var closeBtn = document.createElement('button');
         closeBtn.textContent = 'Close';
         closeBtn.onclick = closePopup;
-        
+
         var errorP = document.createElement('p');
         errorP.className = 'error';
         errorP.textContent = error.message;
-        
+
         popup.innerHTML = '<h3>Error</h3>';
         popup.appendChild(errorP);
         popup.appendChild(closeBtn);
-        popup.style.display = 'block';
+        popup.classList.add('show');
         button.disabled = false;
         button.textContent = 'Sign IPA';
       });
     });
 
     function closePopup() {
-      document.getElementById('popup').style.display = 'none';
+      var popup = document.getElementById('popup');
+      popup.classList.remove('show');
     }
   </script>
 </body>
