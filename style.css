@@ -654,7 +654,7 @@ body[data-theme="dark"] #popup {
   color: #007aff;
   word-break: break-all;
   text-decoration: none;
-  display: block;
+  display: inline-block;
   margin: 15px 0;
 }
 
@@ -722,4 +722,5 @@ body[data-theme="dark"] #popup {
   border-radius: 12px;
   text-align: center;
   text-decoration: none;
+  color: #fff;
 }

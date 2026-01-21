@@ -155,12 +155,6 @@
           linkBtn.rel = 'noopener noreferrer';
           linkBtn.className = 'blue-card';
 
-          var shareInput = document.createElement('input');
-          shareInput.type = 'text';
-          shareInput.value = data.installLink;
-          shareInput.readOnly = true;
-          shareInput.onclick = function() { this.select(); };
-
           var closeBtn = document.createElement('button');
           closeBtn.textContent = 'Close';
           closeBtn.onclick = closePopup;
@@ -169,7 +163,6 @@
           card.appendChild(title);
           card.appendChild(message);
           card.appendChild(linkBtn);
-          card.appendChild(shareInput);
           card.appendChild(closeBtn);
 
           popup.innerHTML = '';
