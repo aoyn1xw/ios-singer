@@ -200,7 +200,7 @@ body[data-theme="dark"] .card {
 }
 
 .blue-card {
-  background: rgba(0 122 255 / 0.65);
+  background: #6aa9ff;
   color: #fff;
   border: 1px solid rgba(255 255 255 / 0.35);
 }
@@ -287,7 +287,7 @@ body[data-theme="dark"] .container.signer form .card {
 }
 
 .container.signer form .card label {
-  flex: 1 1 auto;
+  flex: 0 0 120px;
   min-width: 0;
   white-space: normal;
   text-align: left;
@@ -314,6 +314,12 @@ body[data-theme="dark"] .container.signer form .card {
   white-space: nowrap;
   transition: color 1s ease, border-color 1s ease;
   font-weight: 500;
+}
+
+.container.signer form .card input[type="file"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-left: 8px;
 }
 
 body[data-theme="dark"] .container.signer form .card input[type="text"],
@@ -381,7 +387,7 @@ body[data-theme="dark"] #advancedContent .checkbox-group {
   border-radius: 999px;
   padding: 14px 18px;
   font-weight: 600;
-  background: linear-gradient(180deg, #7fb7ff 0%, #5fa3ff 100%);
+  background: #6aa9ff;
   box-shadow: 0 12px 24px rgba(0, 122, 255, 0.25);
 }
 
