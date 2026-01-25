@@ -49,8 +49,6 @@
         <input type="file" name="ipa" id="ipa">
       </div>
 
-
-
       <div class="card">
         <label>Certificate (.p12)</label>
         <input type="file" name="p12" id="p12" required>
@@ -64,6 +62,67 @@
       <div class="card">
         <label for="p12_password">P12 Password</label>
         <input type="password" name="p12_password" id="p12_password" placeholder="Optional">
+      </div>
+
+      <button type="button" class="chevron-toggle" id="advancedToggle" aria-expanded="false" aria-controls="advancedContent">
+        Advanced
+        <span class="chevron">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </span>
+      </button>
+
+      <div id="advancedContent" aria-hidden="true">
+        <div class="card">
+          <label for="adv_name">App Name</label>
+          <input type="text" name="adv_name" id="adv_name" placeholder="Optional">
+        </div>
+
+        <div class="card">
+          <label for="adv_version">App Version</label>
+          <input type="text" name="adv_version" id="adv_version" placeholder="Optional">
+        </div>
+
+        <div class="card">
+          <label for="adv_bundle_id">Bundle ID</label>
+          <input type="text" name="adv_bundle_id" id="adv_bundle_id" class="wide" placeholder="com.example.app">
+        </div>
+
+        <div class="card">
+          <label for="adv_min_os">Minimum iOS</label>
+          <input type="text" name="adv_min_os" id="adv_min_os" placeholder="e.g. 12.0">
+        </div>
+
+        <div class="checkbox-group">
+          <label for="adv_remove_supported_devices">Remove UISupportedDevices</label>
+          <input type="checkbox" name="adv_remove_supported_devices" id="adv_remove_supported_devices">
+        </div>
+
+        <div class="checkbox-group">
+          <label for="adv_no_watch">Remove Watch App</label>
+          <input type="checkbox" name="adv_no_watch" id="adv_no_watch">
+        </div>
+
+        <div class="checkbox-group">
+          <label for="adv_fakesign">Fakesign Binaries</label>
+          <input type="checkbox" name="adv_fakesign" id="adv_fakesign">
+        </div>
+
+        <div class="checkbox-group">
+          <label for="adv_thin">Thin to arm64</label>
+          <input type="checkbox" name="adv_thin" id="adv_thin">
+        </div>
+
+        <div class="checkbox-group">
+          <label for="adv_remove_extensions">Remove All Extensions</label>
+          <input type="checkbox" name="adv_remove_extensions" id="adv_remove_extensions">
+        </div>
+
+        <div class="checkbox-group">
+          <label for="adv_remove_encrypted">Remove Encrypted Extensions</label>
+          <input type="checkbox" name="adv_remove_encrypted" id="adv_remove_encrypted">
+        </div>
       </div>
 
       <button type="submit" class="blue-card">Sign IPA</button>
@@ -95,6 +154,17 @@
     
     var form = document.getElementById('signForm');
     var popup = document.getElementById('popup');
+    var advancedToggle = document.getElementById('advancedToggle');
+    var advancedContent = document.getElementById('advancedContent');
+
+    if (advancedToggle && advancedContent) {
+      advancedToggle.addEventListener('click', function() {
+        var isExpanded = this.getAttribute('aria-expanded') === 'true';
+        this.setAttribute('aria-expanded', String(!isExpanded));
+        advancedContent.classList.toggle('expanded', !isExpanded);
+        advancedContent.setAttribute('aria-hidden', String(isExpanded));
+      });
+    }
 
 
     form.addEventListener('submit', function(e) {

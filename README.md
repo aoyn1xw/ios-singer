@@ -14,6 +14,7 @@
 - **Modern UI:** Responsive, dark/light mode, mobile compatible.
 - **Automated cleanup:** Old uploads are deleted periodically.
 - **API ready:** Integrate programmatically with a single HTTP request.
+- **Advanced IPA tweaks:** Optional name/version/bundle id edits and common cleanup toggles before signing.
 
 ---
 
@@ -29,6 +30,7 @@ Try it at: **[https://sign.ayon1xw.me/](https://sign.ayon1xw.me/)**
 
 - Node.js 16+
 - `zsign` binary available in `$PATH` or in the project folder
+- `cyan` (pyzule-rw) CLI in `$PATH` if you want advanced IPA tweaks before signing
 - Unix-like system recommended
 
 ### 2. Install & Run
@@ -46,6 +48,7 @@ Set up your environment variables (optional):
 - `PORT` : HTTP port to listen on (default: `3000`)
 - `RATE_LIMIT_WINDOW_MS` : Rate limiting interval (default: 900,000ms)
 - `RATE_LIMIT_MAX` : Max requests per interval (default: 100)
+- `CYAN_CMD` : Path/name for the `cyan` CLI (default: `cyan`)
 
 Start the server:
 
@@ -65,6 +68,7 @@ The server will be accessible at [http://localhost:3000](http://localhost:3000).
    - P12 certificate (.p12)
    - Provisioning profile (.mobileprovision)
    - Optionally, provide your P12 password (if set).
+   - Optionally, expand Advanced to tweak the app before signing.
 3. **Click** "Sign IPA". Wait for processing.
 4. **Receive**:
    - Page with iOS install link.
@@ -82,7 +86,12 @@ You can sign IPAs programmatically using the `/sign` API endpoint.
 - **Method:** `POST`
 - **Content-Type:** `multipart/form-data`
 - **Required fields:** `ipa`, `p12`, `mobileprovision`
-- **Optional field:** `p12_password`
+- **Optional fields:** `p12_password`, advanced tweak fields (see below)
+
+Advanced tweak fields:
+- `adv_name`, `adv_version`, `adv_bundle_id`, `adv_min_os`
+- `adv_remove_supported_devices`, `adv_no_watch`, `adv_fakesign`, `adv_thin`
+- `adv_remove_extensions`, `adv_remove_encrypted`
 
 #### Example using `curl`:
 
@@ -91,7 +100,10 @@ curl -X POST https://sign.ayon1xw.me/sign \
   -F "ipa=@your/app.ipa" \
   -F "p12=@your/certificate.p12" \
   -F "mobileprovision=@your/profile.mobileprovision" \
-  -F "p12_password=yourpassword"
+  -F "p12_password=yourpassword" \
+  -F "adv_name=New Name" \
+  -F "adv_bundle_id=com.example.app" \
+  -F "adv_remove_supported_devices=on"
 ```
 
 #### Success Response

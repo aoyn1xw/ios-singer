@@ -316,6 +316,11 @@ body[data-theme="dark"] .container.signer form .card {
   font-weight: 500;
 }
 
+.container.signer form .card input.wide {
+  flex: 1 1 auto;
+  text-align: left;
+}
+
 .container.signer form .card input[type="file"] {
   flex: 1 1 auto;
   min-width: 0;

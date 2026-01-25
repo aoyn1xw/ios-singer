@@ -12,6 +12,7 @@ const cors = require('cors');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const winston = require('winston');
+const { spawn } = require('child_process');
 
 const {
   PORT = 3000,
@@ -21,6 +22,7 @@ const {
 } = process.env;
 
 const PUBLIC_DOMAIN = 'https://sign.ayon1xw.me/'; // always use this domain
+const CYAN_CMD = process.env.CYAN_CMD || 'cyan';
 
 const WORK_DIR = path.join(__dirname, 'uploads');
 const REQUIRED_DIRS = ['p12', 'mp', 'temp', 'signed', 'plist'];
@@ -120,6 +122,26 @@ function generateManifestPlist(ipaUrl, bundleId, bundleVersion, displayName) {
 </plist>`;
 }
 
+function runCyan({ inputPath, outputPath, extraArgs }) {
+  return new Promise((resolve, reject) => {
+    const args = ['-i', inputPath, '-o', outputPath];
+    if (extraArgs?.length) args.push(...extraArgs);
+
+    const child = spawn(CYAN_CMD, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout.on('data', (data) => { stdout += data.toString(); });
+    child.stderr.on('data', (data) => { stderr += data.toString(); });
+    child.on('error', reject);
+    child.on('close', (code) => {
+      if (code === 0) return resolve({ stdout, stderr });
+      const output = stderr.trim() || stdout.trim();
+      reject(new Error(`cyan failed (${code})${output ? `: ${output}` : ''}`));
+    });
+  });
+}
+
 function signIpaInWorker({ p12Path, p12Password, mpPath, ipaPath, signedIpaPath }) {
   return new Promise((resolve, reject) => {
     const worker = new Worker(path.join(__dirname, 'zsign-worker.js'), {
@@ -140,7 +162,7 @@ app.post('/sign',
   ]),
   async (req, res) => {
     logger.info('Sign request received');
-    let uniqueSuffix, ipaPath, p12Path, mpPath, signedIpaPath, metadataPath;
+    let uniqueSuffix, ipaPath, inputIpaPath, p12Path, mpPath, signedIpaPath, metadataPath, cyanIpaPath;
 
     try {
       if (!req.files?.p12 || !req.files?.mobileprovision) return res.status(400).json({ error: 'P12 and MobileProvision required' });
@@ -149,8 +171,9 @@ app.post('/sign',
 
       // Only handle IPA file upload
       if (req.files.ipa) {
-        ipaPath = path.join(WORK_DIR, 'temp', `input_${uniqueSuffix}.ipa`);
-        await fsp.rename(req.files.ipa[0].path, ipaPath);
+        inputIpaPath = path.join(WORK_DIR, 'temp', `input_${uniqueSuffix}.ipa`);
+        await fsp.rename(req.files.ipa[0].path, inputIpaPath);
+        ipaPath = inputIpaPath;
       } else return res.status(400).json({ error: 'IPA file required' });
 
       const p12Password = (req.body.p12_password || '').trim();
@@ -159,6 +182,45 @@ app.post('/sign',
 
       await fsp.rename(req.files.p12[0].path, p12Path);
       await fsp.rename(req.files.mobileprovision[0].path, mpPath);
+
+      const trimValue = (value) => (typeof value === 'string' ? value.trim() : '');
+      const isChecked = (value) => value === 'on' || value === 'true' || value === true || value === '1';
+      const cyanArgs = [];
+
+      const advName = trimValue(req.body.adv_name);
+      const advVersion = trimValue(req.body.adv_version);
+      const advBundleId = trimValue(req.body.adv_bundle_id);
+      const advMinOs = trimValue(req.body.adv_min_os);
+
+      if (advName) cyanArgs.push('-n', advName);
+      if (advVersion) cyanArgs.push('-v', advVersion);
+      if (advBundleId) cyanArgs.push('-b', advBundleId);
+      if (advMinOs) cyanArgs.push('-m', advMinOs);
+
+      const removeExtensions = isChecked(req.body.adv_remove_extensions);
+      const removeEncrypted = isChecked(req.body.adv_remove_encrypted);
+
+      if (removeExtensions && removeEncrypted) {
+        return res.status(400).json({ error: 'Choose either remove all extensions or only encrypted extensions.' });
+      }
+
+      if (isChecked(req.body.adv_remove_supported_devices)) cyanArgs.push('-u');
+      if (isChecked(req.body.adv_no_watch)) cyanArgs.push('-w');
+      if (isChecked(req.body.adv_fakesign)) cyanArgs.push('-s');
+      if (isChecked(req.body.adv_thin)) cyanArgs.push('-q');
+      if (removeExtensions) cyanArgs.push('-e');
+      if (removeEncrypted) cyanArgs.push('-g');
+
+      if (cyanArgs.length) {
+        logger.info('Running cyan modifications');
+        cyanIpaPath = path.join(WORK_DIR, 'temp', `cyan_${uniqueSuffix}.ipa`);
+        await runCyan({
+          inputPath: ipaPath,
+          outputPath: cyanIpaPath,
+          extraArgs: cyanArgs,
+        });
+        ipaPath = cyanIpaPath;
+      }
 
       signedIpaPath = path.join(WORK_DIR, 'signed', `signed_${uniqueSuffix}.ipa`);
       await signIpaInWorker({ p12Path, p12Password, mpPath, ipaPath, signedIpaPath });
@@ -224,9 +286,10 @@ app.post('/sign',
       logger.error(`Signing error: ${err}`);
       return res.status(500).json({ error: 'Signing failed', details: err.message });
     } finally {
-      try { if (ipaPath && fs.existsSync(ipaPath)) await fsp.unlink(ipaPath);
+      try { if (inputIpaPath && fs.existsSync(inputIpaPath)) await fsp.unlink(inputIpaPath);
             if (p12Path && fs.existsSync(p12Path)) await fsp.unlink(p12Path);
             if (mpPath && fs.existsSync(mpPath)) await fsp.unlink(mpPath);
+            if (cyanIpaPath && fs.existsSync(cyanIpaPath)) await fsp.unlink(cyanIpaPath);
       } catch {}
     }
   }
@@ -303,4 +366,3 @@ if (!global.serverStarted) {
     global.serverStarted = true;
   });
 }
-
