@@ -133,7 +133,12 @@ function runCyan({ inputPath, outputPath, extraArgs }) {
 
     child.stdout.on('data', (data) => { stdout += data.toString(); });
     child.stderr.on('data', (data) => { stderr += data.toString(); });
-    child.on('error', reject);
+    child.on('error', (err) => {
+      if (err && err.code === 'ENOENT') {
+        return reject(new Error('cyan not found; install pyzule-rw or set CYAN_CMD, or disable Advanced tweaks.'));
+      }
+      reject(err);
+    });
     child.on('close', (code) => {
       if (code === 0) return resolve({ stdout, stderr });
       const output = stderr.trim() || stdout.trim();
