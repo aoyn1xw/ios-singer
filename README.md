@@ -18,7 +18,7 @@
 
 ---
 
-## Live Demo
+## Test it out
 
 Try it at: **[https://sign.ayon1xw.me/](https://sign.ayon1xw.me/)**
 
